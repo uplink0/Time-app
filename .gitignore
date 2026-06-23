@@ -1,0 +1,29 @@
+# Node.js
+node_modules/
+npm-debug.log*
+
+# Env
+.env
+.env.*
+
+# Logs
+logs/
+*.log
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Build
+dist/
+build/
+
+# Docker
+docker-data/
+
+# Temporary
+tmp/
+temp/
