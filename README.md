@@ -63,18 +63,18 @@ time-app/
 
 ## Запуск через Docker
 
-#Сборка контейнеров:
+Сборка контейнеров:
 
 #bash
 docker compose build
 
 
-#Запуск приложения:
+Запуск приложения:
 
 #bash
 docker compose up -d
 
-#Проверка контейнеров:
+Проверка контейнеров:
 #bash
 docker ps
 
@@ -108,7 +108,7 @@ cd api
 #bash
 npm install
 
-#Запустить сервер:
+Запустить сервер:
 
 #bash
 npm start
@@ -118,7 +118,7 @@ npm start
 
 ### Frontend
 
-#Перейти в папку frontend:
+Перейти в папку frontend:
 #bash
 cd frontend
 
@@ -129,7 +129,7 @@ cd frontend
 npm install
 
 
-#Запустить приложение:
+Запустить приложение:
 
 #bash
 npm run dev
