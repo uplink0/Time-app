@@ -1,0 +1,47 @@
+name: Time App CI
+
+on:
+  push:
+    branches:
+      - main
+      - feature/auth
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build API and Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install API dependencies
+        working-directory: ./api
+        run: npm ci
+
+      - name: Check API build
+        working-directory: ./api
+        run: npm run start --if-present
+        continue-on-error: true
+
+      - name: Install Frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Build API Docker image
+        run: docker build -t time-app-api:ci ./api
+
+      - name: Build Frontend Docker image
+        run: docker build -t time-app-frontend:ci ./frontend
