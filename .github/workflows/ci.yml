@@ -64,6 +64,30 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"username":"ciuser","email":"ciuser@test.local","password":"12345678"}'
 
+      - name: Smoke test auth login
+        run: |
+          curl -f -X POST http://localhost:5000/api/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"username":"ciuser","password":"12345678"}' \
+            -o login-response.json
+
+          cat login-response.json
+
+      - name: Extract JWT token
+        run: |
+          TOKEN=$(node -e "console.log(require('./login-response.json').token)")
+          echo "AUTH_TOKEN=$TOKEN" >> $GITHUB_ENV
+
+      - name: Smoke test protected auth me
+        run: |
+          curl -f http://localhost:5000/api/auth/me \
+            -H "Authorization: Bearer $AUTH_TOKEN"
+
+      - name: Smoke test protected sessions
+        run: |
+          curl -f http://localhost:5000/api/sessions \
+            -H "Authorization: Bearer $AUTH_TOKEN"
+
       - name: Install Frontend dependencies
         working-directory: ./frontend
         run: npm ci
