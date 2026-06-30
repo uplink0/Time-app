@@ -127,7 +127,7 @@ export default {
       sessionTimer: null,
       isPaused: false,
       timerFinished: false,
-      apiUrl: 'http://localhost:5555'
+      apiUrl: '/api'
     }
   },
 
