@@ -52,24 +52,96 @@ const deleteRecord = (id) =>
     })
   )
 
-const startSession = (title) =>
+const createUser = ({ username, email, passwordHash }) =>
   new Promise((resolve, reject) =>
     pool.getConnection((err, connection) => {
       if (err) return reject(err)
 
       connection.query(
         `
-        INSERT INTO focus_sessions 
-        (title, started_at, status)
-        VALUES (?, NOW(), 'active')
+        INSERT INTO users
+        (username, email, password_hash)
+        VALUES (?, ?, ?)
         `,
-        [title],
+        [username, email, passwordHash],
+        (err, result) => {
+          connection.release()
+          if (err) return reject(err)
+
+          resolve({
+            id: result.insertId,
+            username,
+            email
+          })
+        }
+      )
+    })
+  )
+
+const findUserByUsername = (username) =>
+  new Promise((resolve, reject) =>
+    pool.getConnection((err, connection) => {
+      if (err) return reject(err)
+
+      connection.query(
+        `
+        SELECT *
+        FROM users
+        WHERE username = ?
+        LIMIT 1
+        `,
+        [username],
+        (err, results) => {
+          connection.release()
+          if (err) return reject(err)
+          resolve(results[0] || null)
+        }
+      )
+    })
+  )
+
+const findUserById = (id) =>
+  new Promise((resolve, reject) =>
+    pool.getConnection((err, connection) => {
+      if (err) return reject(err)
+
+      connection.query(
+        `
+        SELECT id, username, email, created_at
+        FROM users
+        WHERE id = ?
+        LIMIT 1
+        `,
+        [id],
+        (err, results) => {
+          connection.release()
+          if (err) return reject(err)
+          resolve(results[0] || null)
+        }
+      )
+    })
+  )
+
+const startSession = (title, userId = null) =>
+  new Promise((resolve, reject) =>
+    pool.getConnection((err, connection) => {
+      if (err) return reject(err)
+
+      connection.query(
+        `
+        INSERT INTO focus_sessions
+        (user_id, title, started_at, status)
+        VALUES (?, ?, NOW(), 'active')
+        `,
+        [userId, title],
         (err, result) => {
           connection.release()
           if (err) return reject(err)
           console.log(`Focus session "${title}" was started`)
+
           resolve({
             id: result.insertId,
+            user_id: userId,
             title,
             status: 'active'
           })
@@ -78,10 +150,13 @@ const startSession = (title) =>
     })
   )
 
-const finishSession = (id) =>
+const finishSession = (id, userId = null) =>
   new Promise((resolve, reject) =>
     pool.getConnection((err, connection) => {
       if (err) return reject(err)
+
+      const params = userId ? [id, userId] : [id]
+      const userFilter = userId ? 'AND user_id = ?' : ''
 
       connection.query(
         `
@@ -91,8 +166,9 @@ const finishSession = (id) =>
           duration_minutes = TIMESTAMPDIFF(MINUTE, started_at, NOW()),
           status = 'finished'
         WHERE id = ? AND status = 'active'
+        ${userFilter}
         `,
-        [id],
+        params,
         (err, result) => {
           connection.release()
           if (err) return reject(err)
@@ -103,17 +179,22 @@ const finishSession = (id) =>
     })
   )
 
-const readSessions = () =>
+const readSessions = (userId = null) =>
   new Promise((resolve, reject) =>
     pool.getConnection((err, connection) => {
       if (err) return reject(err)
+
+      const params = userId ? [userId] : []
+      const userFilter = userId ? 'WHERE user_id = ?' : ''
 
       connection.query(
         `
         SELECT *
         FROM focus_sessions
+        ${userFilter}
         ORDER BY created_at DESC
         `,
+        params,
         (err, results) => {
           connection.release()
           if (err) return reject(err)
@@ -123,10 +204,13 @@ const readSessions = () =>
     })
   )
 
-const getStats = () =>
+const getStats = (userId = null) =>
   new Promise((resolve, reject) =>
     pool.getConnection((err, connection) => {
       if (err) return reject(err)
+
+      const params = userId ? [userId] : []
+      const userFilter = userId ? 'AND user_id = ?' : ''
 
       connection.query(
         `
@@ -136,7 +220,9 @@ const getStats = () =>
           COALESCE(MAX(duration_minutes), 0) AS longest_session
         FROM focus_sessions
         WHERE status = 'finished'
+        ${userFilter}
         `,
+        params,
         (err, results) => {
           connection.release()
           if (err) return reject(err)
@@ -150,6 +236,9 @@ export {
   readRecords,
   insertRecord,
   deleteRecord,
+  createUser,
+  findUserByUsername,
+  findUserById,
   startSession,
   finishSession,
   readSessions,

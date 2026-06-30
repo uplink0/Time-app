@@ -1,114 +1,136 @@
 <template>
   <main class="page">
-    <section class="app">
-      <div class="top">
-        <p class="eyebrow">Focus Time</p>
-        <h1>Фокус-таймер</h1>
-        <p class="subtitle">Выбери задачу, задай время и начни рабочую сессию.</p>
-      </div>
+    <div v-if="authLoading" class="loading">Загрузка...</div>
 
-      <input
-        v-model="title"
-        class="task-input"
-        placeholder="Например: Изучение Docker"
-        :disabled="!!activeSession"
-      />
+    <Auth
+      v-else-if="!user"
+      :api-url="apiUrl"
+      @auth-success="handleAuthSuccess"
+    />
 
-      <div class="time-grid">
-        <div class="panel">
-          <span>Текущее время</span>
-          <strong>{{ currentTime }}</strong>
-          <small>{{ currentDate }}</small>
+    <template v-else>
+      <section class="app">
+        <div class="top">
+          <p class="eyebrow">Focus Time</p>
+          <h1>Фокус-таймер</h1>
+          <p class="subtitle">
+            Привет, {{ user.username }}. Это твоё личное пространство.
+          </p>
+
+          <button class="logout" @click="logout">Выйти</button>
         </div>
 
-        <div class="panel accent">
-          <span>Таймер сессии</span>
-          <strong>{{ formattedTimer }}</strong>
+        <input
+          v-model="title"
+          class="task-input"
+          placeholder="Например: Изучение Docker"
+          :disabled="!!activeSession"
+        />
 
-          <div v-if="!activeSession" class="presets">
-            <button @click="setDuration(5)">5 мин</button>
-            <button @click="setDuration(15)">15 мин</button>
-            <button @click="setDuration(25)">25 мин</button>
-            <button @click="setDuration(45)">45 мин</button>
+        <div class="time-grid">
+          <div class="panel">
+            <span>Текущее время</span>
+            <strong>{{ currentTime }}</strong>
+            <small>{{ currentDate }}</small>
           </div>
 
-          <div v-if="!activeSession" class="manual-duration">
-            <label>Своя длительность, минут</label>
+          <div class="panel accent">
+            <span>Таймер сессии</span>
+            <strong>{{ formattedTimer }}</strong>
 
-            <input
-              v-model.number="durationMinutes"
-              @input="setDuration(durationMinutes)"
-              class="duration-input"
-              type="number"
-              min="1"
-              max="180"
-              placeholder="Например: 30"
-            />
+            <div v-if="!activeSession" class="presets">
+              <button @click="setDuration(5)">5 мин</button>
+              <button @click="setDuration(15)">15 мин</button>
+              <button @click="setDuration(25)">25 мин</button>
+              <button @click="setDuration(45)">45 мин</button>
+            </div>
+
+            <div v-if="!activeSession" class="manual-duration">
+              <label>Своя длительность, минут</label>
+
+              <input
+                v-model.number="durationMinutes"
+                @input="setDuration(durationMinutes)"
+                class="duration-input"
+                type="number"
+                min="1"
+                max="180"
+                placeholder="Например: 30"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="actions">
-        <button v-if="!activeSession" @click="startFocusSession" :disabled="loading">
-          Начать сессию
-        </button>
+        <div class="actions">
+          <button v-if="!activeSession" @click="startFocusSession" :disabled="loading">
+            Начать сессию
+          </button>
 
-        <button v-if="activeSession" class="danger" @click="finishFocusSession" :disabled="loading">
-          Завершить
-        </button>
+          <button v-if="activeSession" class="danger" @click="finishFocusSession" :disabled="loading">
+            Завершить
+          </button>
 
-        <button v-if="activeSession" class="light" @click="pauseTimer">
-          {{ isPaused ? 'Продолжить' : 'Пауза' }}
-        </button>
+          <button v-if="activeSession" class="light" @click="pauseTimer">
+            {{ isPaused ? 'Продолжить' : 'Пауза' }}
+          </button>
 
-        <button class="light" @click="loadData" :disabled="loading">
-          Обновить
-        </button>
-      </div>
+          <button class="light" @click="loadData" :disabled="loading">
+            Обновить
+          </button>
+        </div>
 
-      <p v-if="activeSession" class="active">
-        Активная сессия: {{ activeSession.title }}
-      </p>
+        <p v-if="activeSession" class="active">
+          Активная сессия: {{ activeSession.title }}
+        </p>
 
-      <p v-if="message" class="message">
-        {{ message }}
-      </p>
-    </section>
+        <p v-if="message" class="message">
+          {{ message }}
+        </p>
+      </section>
 
-    <section class="stats">
-      <div>
-        <strong>{{ stats.total_sessions }}</strong>
-        <span>сессий</span>
-      </div>
-      <div>
-        <strong>{{ stats.total_minutes }}</strong>
-        <span>минут</span>
-      </div>
-      <div>
-        <strong>{{ stats.longest_session }}</strong>
-        <span>максимум</span>
-      </div>
-    </section>
+      <section class="stats">
+        <div>
+          <strong>{{ stats.total_sessions }}</strong>
+          <span>сессий</span>
+        </div>
+        <div>
+          <strong>{{ stats.total_minutes }}</strong>
+          <span>минут</span>
+        </div>
+        <div>
+          <strong>{{ stats.longest_session }}</strong>
+          <span>максимум</span>
+        </div>
+      </section>
 
-    <section class="history">
-      <h2>История</h2>
+      <section class="history">
+        <h2>История</h2>
 
-      <div v-if="finishedSessions.length === 0" class="empty">
-        Завершённых сессий пока нет.
-      </div>
+        <div v-if="finishedSessions.length === 0" class="empty">
+          Завершённых сессий пока нет.
+        </div>
 
-      <div v-for="session in finishedSessions" :key="session.id" class="history-item">
-        <strong>{{ session.title }}</strong>
-        <span>{{ session.duration_minutes }} мин · {{ formatDate(session.started_at) }}</span>
-      </div>
-    </section>
+        <div v-for="session in finishedSessions" :key="session.id" class="history-item">
+          <strong>{{ session.title }}</strong>
+          <span>{{ session.duration_minutes }} мин · {{ formatDate(session.started_at) }}</span>
+        </div>
+      </section>
+    </template>
   </main>
 </template>
 
 <script>
+import Auth from './components/Auth.vue'
+
 export default {
+  components: {
+    Auth
+  },
+
   data() {
     return {
+      user: null,
+      authLoading: true,
       title: '',
       durationMinutes: 25,
       remainingSeconds: 25 * 60,
@@ -146,7 +168,7 @@ export default {
   mounted() {
     this.updateClock()
     this.clockTimer = setInterval(this.updateClock, 1000)
-    this.loadData()
+    this.checkAuth()
   },
 
   beforeUnmount() {
@@ -155,6 +177,62 @@ export default {
   },
 
   methods: {
+    getAuthHeaders() {
+      const token = localStorage.getItem('token')
+
+      return {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    },
+
+    async checkAuth() {
+      const token = localStorage.getItem('token')
+
+      if (!token) {
+        this.authLoading = false
+        return
+      }
+
+      try {
+        const response = await fetch(`${this.apiUrl}/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          localStorage.removeItem('token')
+          return
+        }
+
+        this.user = data.user
+        await this.loadData()
+      } catch (error) {
+        localStorage.removeItem('token')
+      } finally {
+        this.authLoading = false
+      }
+    },
+
+    handleAuthSuccess(user) {
+      this.user = user
+      this.loadData()
+    },
+
+    logout() {
+      localStorage.removeItem('token')
+      clearInterval(this.sessionTimer)
+
+      this.user = null
+      this.sessions = []
+      this.activeSession = null
+      this.message = ''
+      this.remainingSeconds = Number(this.durationMinutes) * 60
+    },
+
     updateClock() {
       const now = new Date()
 
@@ -184,7 +262,10 @@ export default {
 
     async loadSessions() {
       try {
-        const response = await fetch(`${this.apiUrl}/sessions`)
+        const response = await fetch(`${this.apiUrl}/sessions`, {
+          headers: this.getAuthHeaders()
+        })
+
         const data = await response.json()
 
         this.sessions = data
@@ -196,7 +277,10 @@ export default {
 
     async loadStats() {
       try {
-        const response = await fetch(`${this.apiUrl}/stats`)
+        const response = await fetch(`${this.apiUrl}/stats`, {
+          headers: this.getAuthHeaders()
+        })
+
         this.stats = await response.json()
       } catch (error) {
         this.message = 'Не удалось загрузить статистику'
@@ -212,7 +296,7 @@ export default {
 
         const response = await fetch(`${this.apiUrl}/sessions/start`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: this.getAuthHeaders(),
           body: JSON.stringify({ title: sessionTitle })
         })
 
@@ -263,7 +347,8 @@ export default {
         this.loading = true
 
         await fetch(`${this.apiUrl}/sessions/finish/${this.activeSession.id}`, {
-          method: 'POST'
+          method: 'POST',
+          headers: this.getAuthHeaders()
         })
 
         clearInterval(this.sessionTimer)
@@ -313,6 +398,12 @@ body {
   align-content: start;
 }
 
+.loading {
+  margin-top: 80px;
+  color: #d0d5dd;
+  font-size: 20px;
+}
+
 .app,
 .stats,
 .history {
@@ -338,6 +429,11 @@ h1 {
 .subtitle {
   margin: 10px 0 0;
   color: #d0d5dd;
+}
+
+.logout {
+  margin-top: 16px;
+  background: #fff;
 }
 
 .task-input,
