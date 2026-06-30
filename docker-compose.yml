@@ -1,7 +1,10 @@
 version: '3'
+
 services:
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     restart: always
     ports:
       - '3000:3000'
@@ -10,7 +13,7 @@ services:
       - ./frontend:/app
 
   api:
-    build: ./api 
+    build: ./api
     restart: always
     ports:
       - '5555:5000'
@@ -19,6 +22,7 @@ services:
     volumes:
       - ./api:/app
       - /app/node_modules
+
   mysql:
     image: mysql
     restart: always
@@ -27,6 +31,7 @@ services:
       MYSQL_DATABASE: time_db
     volumes:
       - mysql_data:/var/lib/mysql
+
   adminer:
     image: adminer
     restart: always
