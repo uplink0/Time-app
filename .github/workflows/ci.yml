@@ -105,13 +105,25 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Build API image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/time-app-api:latest ./api
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKER_USERNAME }}/time-app-api:latest \
+            -t ${{ secrets.DOCKER_USERNAME }}/time-app-api:${{ github.sha }} \
+            ./api
 
       - name: Push API image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/time-app-api:latest
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/time-app-api:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/time-app-api:${{ github.sha }}
 
       - name: Build Frontend image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/time-app-frontend:latest ./frontend
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKER_USERNAME }}/time-app-frontend:latest \
+            -t ${{ secrets.DOCKER_USERNAME }}/time-app-frontend:${{ github.sha }} \
+            ./frontend
 
       - name: Push Frontend image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/time-app-frontend:latest
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/time-app-frontend:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/time-app-frontend:${{ github.sha }}
