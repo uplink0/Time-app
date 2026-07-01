@@ -1,176 +1,210 @@
-# Time App
+# ⏱️ Time App
 
-Веб-приложение для отображения и управления временем с разделением на Frontend и Backend сервисы.
+A full-stack time management application built as a DevOps learning project.
 
-## Технологии
+The project demonstrates a complete modern deployment workflow:
 
-### Frontend
-
-* Vue 3
-* Vite
-* JavaScript
-
-### Backend
-
-* Node.js
-* Express
-* MySQL
-
-### DevOps
-
-* Docker
-* Docker Compose
-* Git
+- Vue 3 Frontend
+- Node.js + Express Backend
+- MySQL Database
+- Docker
+- Kubernetes
+- Ingress
+- JWT Authentication
+- GitHub Actions CI
 
 ---
 
-## Архитектура проекта
+# Project Architecture
 
-#Structure
-Frontend (Vue)
-       |
-       v
-Backend (Node.js API)
-       |
-       v
-MySQL Database
+```
+                    GitHub
+
+                       │
+
+                 GitHub Actions CI
+
+                       │
+
+              Docker Image Build
+
+                       │
+
+                 Kubernetes Cluster
+
+                       │
+
+        ┌──────────────┴──────────────┐
+
+        │                             │
+
+   Frontend (Vue)               Backend (Express)
+
+        │                             │
+
+        └──────────────┬──────────────┘
+
+                       │
+
+                   MySQL Database
+```
 
 ---
 
-## Структура проекта
+# Technology Stack
 
-#Structure
+## Frontend
+
+- Vue 3
+- Vite
+- JavaScript
+
+## Backend
+
+- Node.js
+- Express
+- MySQL
+- JWT Authentication
+- bcrypt
+
+## DevOps
+
+- Docker
+- Docker Compose
+- Kubernetes
+- Ingress
+- ConfigMap
+- Secret
+- GitHub Actions
+- Git
+
+---
+
+# Features
+
+- User Registration
+- User Login
+- JWT Authentication
+- Personal User Space
+- Focus Sessions
+- Session History
+- Statistics
+- REST API
+- Responsive Frontend
+
+---
+
+# Project Structure
+
+```
 time-app/
-│
+
 ├── api/
 │   ├── src/
 │   ├── Dockerfile
-│   ├── package.json
-│   └── package-lock.json
+│   └── package.json
 │
 ├── frontend/
 │   ├── src/
 │   ├── public/
 │   ├── Dockerfile
-│   ├── package.json
-│   └── package-lock.json
+│   └── package.json
+│
+├── k8s/
+│   ├── base/
+│   ├── ingress.yaml
+│   ├── api.yaml
+│   ├── frontend.yaml
+│   └── mysql.yaml
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 │
 ├── docker-compose.yml
 ├── README.md
 └── .gitignore
+```
 
 ---
 
-## Запуск через Docker
+# Running with Docker
 
-Сборка контейнеров:
+Build containers
 
-#bash
+```bash
 docker compose build
+```
 
+Start services
 
-Запуск приложения:
-
-#bash
+```bash
 docker compose up -d
+```
 
-Проверка контейнеров:
-#bash
-docker ps
+Stop services
 
-
-Просмотр логов:
-
-#bash
-docker compose logs -f
-
-
-Остановка приложения:
-
-#bash
+```bash
 docker compose down
-
-
----
-
-## Запуск без Docker
-
-### Backend
-
-Перейти в папку API:
-
-#bash
-cd api
-
-
-Установить зависимости:
-
-#bash
-npm install
-
-Запустить сервер:
-
-#bash
-npm start
-
+```
 
 ---
 
-### Frontend
+# Running with Kubernetes
 
-Перейти в папку frontend:
-#bash
-cd frontend
+Apply manifests
 
+```bash
+kubectl apply -f k8s/base
+```
 
-Установить зависимости:
+Check resources
 
-#bash
-npm install
-
-
-Запустить приложение:
-
-#bash
-npm run dev
-
+```bash
+kubectl get pods -n time-app
+kubectl get svc -n time-app
+```
 
 ---
 
-## Используемые порты
+# CI Pipeline
 
-| Сервис      | Порт |
-| ----------- | ---- |
-| Frontend    | 5173 |
-| Backend API | 3000 |
-| MySQL       | 3306 |
+Every push to **main** automatically performs:
 
----
-
-## Возможности проекта
-
-* Работа с текущим временем
-* REST API
-* Docker-контейнеризация
-* Разделение Frontend и Backend
-* Подготовка к развертыванию в Kubernetes
+- Checkout repository
+- Install dependencies
+- Start temporary MySQL
+- Start API
+- Health check
+- User registration smoke test
+- Login smoke test
+- JWT validation
+- Protected endpoint validation
+- Frontend build
+- Docker image build
 
 ---
 
-## Цели проекта
+# Roadmap
 
-Проект создан в учебных целях для изучения:
-
-* Git
-* Docker
-* Docker Compose
-* Frontend / Backend взаимодействия
-* Основ DevOps практик
+- [x] Docker
+- [x] Docker Compose
+- [x] Kubernetes
+- [x] Ingress
+- [x] JWT Authentication
+- [x] GitHub Actions CI
+- [ ] Docker Registry
+- [ ] Continuous Deployment (CD)
+- [ ] Helm
+- [ ] Prometheus
+- [ ] Grafana
+- [ ] Loki
+- [ ] Unit Tests
 
 ---
 
-## Автор
+# Author
 
-Ivan K.
+**Ivan K.**
 
-System Administrator / DevOps Engineer
+System Administrator • DevOps Engineer
