@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: time-app-api:v4
+          image: time-app-api:latest
           imagePullPolicy: IfNotPresent
 
           ports:

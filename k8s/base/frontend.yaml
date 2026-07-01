@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: time-app-frontend:v4
+          image: time-app-frontend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
