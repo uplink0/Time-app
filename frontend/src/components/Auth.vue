@@ -5,33 +5,29 @@
     <h1>{{ isRegister ? 'Регистрация' : 'Вход' }}</h1>
 
     <p class="subtitle">
-      {{ isRegister ? 'Создай аккаунт для личного пространства.' : 'Войди, чтобы увидеть свои сессии.' }}
+      {{
+        isRegister
+          ? 'Создай аккаунт для личного пространства.'
+          : 'Войди, чтобы увидеть свои сессии.'
+      }}
     </p>
 
-    <input
-      v-model="username"
-      placeholder="Логин"
-    />
+    <input v-model="username" placeholder="Логин" />
 
-    <input
-      v-if="isRegister"
-      v-model="email"
-      placeholder="Email"
-      type="email"
-    />
+    <input v-if="isRegister" v-model="email" placeholder="Email" type="email" />
 
-    <input
-      v-model="password"
-      placeholder="Пароль"
-      type="password"
-    />
+    <input v-model="password" placeholder="Пароль" type="password" />
 
     <button @click="submit" :disabled="loading">
       {{ isRegister ? 'Зарегистрироваться' : 'Войти' }}
     </button>
 
     <button class="link" @click="toggleMode">
-      {{ isRegister ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться' }}
+      {{
+        isRegister
+          ? 'Уже есть аккаунт? Войти'
+          : 'Нет аккаунта? Зарегистрироваться'
+      }}
     </button>
 
     <p v-if="message" class="message">
@@ -45,8 +41,8 @@ export default {
   props: {
     apiUrl: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
 
   emits: ['auth-success'],
@@ -58,7 +54,7 @@ export default {
       email: '',
       password: '',
       loading: false,
-      message: ''
+      message: '',
     }
   },
 
@@ -81,19 +77,19 @@ export default {
           ? {
               username: this.username,
               email: this.email,
-              password: this.password
+              password: this.password,
             }
           : {
               username: this.username,
-              password: this.password
+              password: this.password,
             }
 
         const response = await fetch(endpoint, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
-          body: JSON.stringify(body)
+          body: JSON.stringify(body),
         })
 
         const data = await response.json()
@@ -110,8 +106,8 @@ export default {
       } finally {
         this.loading = false
       }
-    }
-  }
+    },
+  },
 }
 </script>
 

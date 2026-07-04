@@ -62,11 +62,20 @@
         </div>
 
         <div class="actions">
-          <button v-if="!activeSession" @click="startFocusSession" :disabled="loading">
+          <button
+            v-if="!activeSession"
+            @click="startFocusSession"
+            :disabled="loading"
+          >
             Начать сессию
           </button>
 
-          <button v-if="activeSession" class="danger" @click="finishFocusSession" :disabled="loading">
+          <button
+            v-if="activeSession"
+            class="danger"
+            @click="finishFocusSession"
+            :disabled="loading"
+          >
             Завершить
           </button>
 
@@ -110,9 +119,16 @@
           Завершённых сессий пока нет.
         </div>
 
-        <div v-for="session in finishedSessions" :key="session.id" class="history-item">
+        <div
+          v-for="session in finishedSessions"
+          :key="session.id"
+          class="history-item"
+        >
           <strong>{{ session.title }}</strong>
-          <span>{{ session.duration_minutes }} мин · {{ formatDate(session.started_at) }}</span>
+          <span
+            >{{ session.duration_minutes }} мин ·
+            {{ formatDate(session.started_at) }}</span
+          >
         </div>
       </section>
     </template>
@@ -124,7 +140,7 @@ import Auth from './components/Auth.vue'
 
 export default {
   components: {
-    Auth
+    Auth,
   },
 
   data() {
@@ -141,7 +157,7 @@ export default {
       stats: {
         total_sessions: 0,
         total_minutes: 0,
-        longest_session: 0
+        longest_session: 0,
       },
       loading: false,
       message: '',
@@ -149,7 +165,7 @@ export default {
       sessionTimer: null,
       isPaused: false,
       timerFinished: false,
-      apiUrl: '/api'
+      apiUrl: '/api',
     }
   },
 
@@ -157,12 +173,15 @@ export default {
     formattedTimer() {
       const minutes = Math.floor(this.remainingSeconds / 60)
       const seconds = this.remainingSeconds % 60
-      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(
+        2,
+        '0'
+      )}`
     },
 
     finishedSessions() {
       return this.sessions.filter((item) => item.status === 'finished')
-    }
+    },
   },
 
   mounted() {
@@ -182,7 +201,7 @@ export default {
 
       return {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       }
     },
 
@@ -197,8 +216,8 @@ export default {
       try {
         const response = await fetch(`${this.apiUrl}/auth/me`, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         })
 
         const data = await response.json()
@@ -239,14 +258,14 @@ export default {
       this.currentTime = now.toLocaleTimeString('ru-RU', {
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit'
+        second: '2-digit',
       })
 
       this.currentDate = now.toLocaleDateString('ru-RU', {
         weekday: 'long',
         day: 'numeric',
         month: 'long',
-        year: 'numeric'
+        year: 'numeric',
       })
     },
 
@@ -263,13 +282,14 @@ export default {
     async loadSessions() {
       try {
         const response = await fetch(`${this.apiUrl}/sessions`, {
-          headers: this.getAuthHeaders()
+          headers: this.getAuthHeaders(),
         })
 
         const data = await response.json()
 
         this.sessions = data
-        this.activeSession = data.find((item) => item.status === 'active') || null
+        this.activeSession =
+          data.find((item) => item.status === 'active') || null
       } catch (error) {
         this.message = 'Не удалось загрузить сессии'
       }
@@ -278,7 +298,7 @@ export default {
     async loadStats() {
       try {
         const response = await fetch(`${this.apiUrl}/stats`, {
-          headers: this.getAuthHeaders()
+          headers: this.getAuthHeaders(),
         })
 
         this.stats = await response.json()
@@ -297,7 +317,7 @@ export default {
         const response = await fetch(`${this.apiUrl}/sessions/start`, {
           method: 'POST',
           headers: this.getAuthHeaders(),
-          body: JSON.stringify({ title: sessionTitle })
+          body: JSON.stringify({ title: sessionTitle }),
         })
 
         this.activeSession = await response.json()
@@ -348,7 +368,7 @@ export default {
 
         await fetch(`${this.apiUrl}/sessions/finish/${this.activeSession.id}`, {
           method: 'POST',
-          headers: this.getAuthHeaders()
+          headers: this.getAuthHeaders(),
         })
 
         clearInterval(this.sessionTimer)
@@ -372,8 +392,8 @@ export default {
     formatDate(value) {
       if (!value) return ''
       return new Date(value).toLocaleString('ru-RU')
-    }
-  }
+    },
+  },
 }
 </script>
 

@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
         - name: api
-          image: time-app-api:latest
-          imagePullPolicy: IfNotPresent
+          image: uplink0/time-app-api:latest
+          imagePullPolicy: Always
 
           ports:
             - containerPort: 5000

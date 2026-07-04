@@ -127,3 +127,19 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/time-app-frontend:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/time-app-frontend:${{ github.sha }}
+
+      - name: Deploy to AtlasInfra
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            sudo k3s ctr images pull docker.io/uplink0/time-app-api:latest
+            sudo k3s ctr images pull docker.io/uplink0/time-app-frontend:latest
+
+            sudo k3s kubectl rollout restart deployment/api -n time-app
+            sudo k3s kubectl rollout restart deployment/frontend -n time-app
+
+            sudo k3s kubectl rollout status deployment/api -n time-app
+            sudo k3s kubectl rollout status deployment/frontend -n time-app
