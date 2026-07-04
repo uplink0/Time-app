@@ -14,7 +14,7 @@
           <p class="eyebrow">Focus Time</p>
           <h1>Фокус-таймер</h1>
           <p class="subtitle">
-            Привет, {{ user.username }}. Это твоё личное пространство.
+            Привет, дорогой друг {{ user.username }}. Теперь это твоё личное пространство.
           </p>
 
           <button class="logout" @click="logout">Выйти</button>
