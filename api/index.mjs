@@ -3,6 +3,7 @@ import bodyParser from 'body-parser'
 import cors from 'cors'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import rateLimit from 'express-rate-limit'
 import {
   readRecords,
   insertRecord,
@@ -23,6 +24,26 @@ const app = express()
 
 app.use(bodyParser.json())
 app.use(cors())
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    message: 'Too many auth requests, please try again later',
+  },
+})
+
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    message: 'Слишком много попыток регистрации, попробуйте позднее',
+  },
+})
 
 const createToken = (user) =>
   jwt.sign(
@@ -77,8 +98,7 @@ app.get('/health', (_, res) => {
     service: 'time-app-api',
   })
 })
-
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/register', registerLimiter, async (req, res) => {
   try {
     const { username, email, password } = req.body
 
@@ -124,7 +144,7 @@ app.post('/api/auth/register', async (req, res) => {
   }
 })
 
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', authLimiter, async (req, res) => {
   try {
     const { username, password } = req.body
 
