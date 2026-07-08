@@ -1,57 +1,82 @@
 # ⏱️ Time App
 
-A full-stack time management application built as a DevOps learning project.
+A production-style full-stack web application built as a personal DevOps learning project.
 
-The project demonstrates a complete modern deployment workflow:
+The project demonstrates a complete modern deployment workflow including containerization, Kubernetes orchestration, CI/CD, HTTPS, automated backups and infrastructure automation.
 
-- Vue 3 Frontend
-- Node.js + Express Backend
-- MySQL Database
-- Docker
-- Kubernetes
-- Ingress
-- JWT Authentication
-- GitHub Actions CI
+The entire infrastructure is deployed and maintained on a self-managed VPS.
 
 ---
 
-# Project Architecture
+# Live Demo
 
-```
-                    GitHub
+🌐 https://app.atlas-infra.ru
 
-                       │
+---
 
-                 GitHub Actions CI
+# Architecture
 
-                       │
-
-              Docker Image Build
+```text
+                   Developer
 
                        │
 
-                 Kubernetes Cluster
+                 Git Push / Pull Request
 
                        │
 
-        ┌──────────────┴──────────────┐
-
-        │                             │
-
-   Frontend (Vue)               Backend (Express)
-
-        │                             │
-
-        └──────────────┬──────────────┘
+                GitHub Repository
 
                        │
 
-                   MySQL Database
+                GitHub Actions CI
+
+                       │
+
+                 Docker Build
+
+                       │
+
+                  Docker Hub
+
+                       │
+
+                AtlasInfra VPS
+
+                       │
+
+                k3s Kubernetes
+
+                       │
+
+              NGINX Ingress Controller
+
+                       │
+
+                 HTTPS (Let's Encrypt)
+
+                       │
+
+          ┌────────────┴────────────┐
+
+          │                         │
+
+      Frontend                 Backend API
+
+       Vue 3                  Node.js / Express
+
+          │                         │
+
+          └────────────┬────────────┘
+
+                       │
+
+                    MySQL
 ```
 
 ---
 
-# Technology Stack
+# Tech Stack
 
 ## Frontend
 
@@ -71,12 +96,34 @@ The project demonstrates a complete modern deployment workflow:
 
 - Docker
 - Docker Compose
-- Kubernetes
-- Ingress
+- Kubernetes (k3s)
+- NGINX Ingress
 - ConfigMap
 - Secret
 - GitHub Actions
-- Git
+- Docker Hub
+- Let's Encrypt
+- cert-manager
+- UFW
+- Fail2Ban
+
+---
+
+# Infrastructure
+
+Production environment:
+
+- Ubuntu Server 24.04 LTS
+- Docker Engine
+- k3s Kubernetes Cluster
+- NGINX Ingress Controller
+- cert-manager
+- Let's Encrypt HTTPS
+- GitHub Actions CI/CD
+- Docker Hub Registry
+- Automated MySQL Backups
+- UFW Firewall
+- Fail2Ban Protection
 
 ---
 
@@ -85,18 +132,61 @@ The project demonstrates a complete modern deployment workflow:
 - User Registration
 - User Login
 - JWT Authentication
-- Personal User Space
+- Personal User Dashboard
 - Focus Sessions
 - Session History
 - Statistics
 - REST API
-- Responsive Frontend
+- Responsive UI
+
+---
+
+# CI/CD Pipeline
+
+Every push to **main** automatically performs:
+
+- Checkout repository
+- Install dependencies
+- Build frontend
+- Start temporary MySQL
+- Start backend
+- Health check
+- Registration smoke test
+- Login smoke test
+- JWT validation
+- Protected endpoint validation
+- Build Docker images
+- Push images to Docker Hub
+- Deploy to Kubernetes
+
+---
+
+# Security
+
+- HTTPS (Let's Encrypt)
+- JWT Authentication
+- Password hashing (bcrypt)
+- Kubernetes Secrets
+- SSH Key Authentication
+- UFW Firewall
+- Fail2Ban
+- Environment Variables
+
+---
+
+# Automated Backups
+
+The project includes automatic MySQL backups.
+
+- Daily backup at 03:00
+- Old backup automatically removed
+- Compressed backup archive (.sql.gz)
 
 ---
 
 # Project Structure
 
-```
+```text
 time-app/
 
 ├── api/
@@ -111,11 +201,16 @@ time-app/
 │   └── package.json
 │
 ├── k8s/
-│   ├── base/
-│   ├── ingress.yaml
-│   ├── api.yaml
-│   ├── frontend.yaml
-│   └── mysql.yaml
+│   └── base/
+│       ├── namespace.yaml
+│       ├── api.yaml
+│       ├── frontend.yaml
+│       ├── mysql.yaml
+│       ├── ingress.yaml
+│       ├── configmap.yaml
+│       └── secret.yaml
+│
+├── ansible/
 │
 ├── .github/
 │   └── workflows/
@@ -128,7 +223,13 @@ time-app/
 
 ---
 
-# Running with Docker
+# Local Development
+
+Clone repository
+
+```bash
+git clone https://github.com/uplink0/time-app.git
+```
 
 Build containers
 
@@ -136,13 +237,13 @@ Build containers
 docker compose build
 ```
 
-Start services
+Run application
 
 ```bash
 docker compose up -d
 ```
 
-Stop services
+Stop application
 
 ```bash
 docker compose down
@@ -150,7 +251,7 @@ docker compose down
 
 ---
 
-# Running with Kubernetes
+# Kubernetes Deployment
 
 Apply manifests
 
@@ -162,44 +263,51 @@ Check resources
 
 ```bash
 kubectl get pods -n time-app
+
 kubectl get svc -n time-app
+
+kubectl get ingress -n time-app
 ```
-
----
-
-# CI Pipeline
-
-Every push to **main** automatically performs:
-
-- Checkout repository
-- Install dependencies
-- Start temporary MySQL
-- Start API
-- Health check
-- User registration smoke test
-- Login smoke test
-- JWT validation
-- Protected endpoint validation
-- Frontend build
-- Docker image build
 
 ---
 
 # Roadmap
 
+## Completed
+
 - [x] Docker
 - [x] Docker Compose
-- [x] Kubernetes
-- [x] Ingress
+- [x] Kubernetes (k3s)
+- [x] NGINX Ingress
+- [x] HTTPS
+- [x] Let's Encrypt
+- [x] cert-manager
 - [x] JWT Authentication
 - [x] GitHub Actions CI
-- [ ] Docker Registry
-- [ ] Continuous Deployment (CD)
+- [x] Docker Hub
+- [x] Continuous Deployment
+- [x] Automated Backups
+- [x] UFW
+- [x] Fail2Ban
+
+## In Progress
+
+- [ ] Ansible Infrastructure Automation
 - [ ] Helm
 - [ ] Prometheus
 - [ ] Grafana
 - [ ] Loki
-- [ ] Unit Tests
+- [ ] ArgoCD
+- [ ] Terraform
+- [ ] Monitoring Dashboard
+
+---
+
+# About
+
+This repository is my personal DevOps laboratory.
+
+The goal is to build and maintain a production-like infrastructure using modern DevOps tools and best practices while continuously improving automation, observability and security.
 
 ---
 
@@ -207,4 +315,7 @@ Every push to **main** automatically performs:
 
 **Ivan K.**
 
-System Administrator • DevOps Engineer
+Junior DevOps Engineer
+
+GitHub:
+https://github.com/uplink0

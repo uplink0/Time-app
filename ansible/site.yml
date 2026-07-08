@@ -1,0 +1,10 @@
+- name: Configure AtlasInfra server
+  hosts: atlas
+  become: true
+
+  roles:
+    - common
+    - security
+    - docker
+    - k3s
+    - backup
