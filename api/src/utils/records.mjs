@@ -100,6 +100,28 @@ const findUserByUsername = (username) =>
     })
   )
 
+const findUserByEmail = (email) =>
+  new Promise((resolve, reject) =>
+    pool.getConnection((err, connection) => {
+      if (err) return reject(err)
+
+      connection.query(
+        `
+        SELECT *
+        FROM users
+        WHERE email = ?
+        LIMIT 1
+        `,
+        [email],
+        (err, results) => {
+          connection.release()
+          if (err) return reject(err)
+          resolve(results[0] || null)
+        }
+      )
+    })
+  )  
+
 const findUserById = (id) =>
   new Promise((resolve, reject) =>
     pool.getConnection((err, connection) => {
@@ -238,6 +260,7 @@ export {
   deleteRecord,
   createUser,
   findUserByUsername,
+  findUserByEmail,
   findUserById,
   startSession,
   finishSession,
