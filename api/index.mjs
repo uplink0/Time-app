@@ -37,8 +37,8 @@ const authLimiter = rateLimit({
 })
 
 const registerLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 5,
+  windowMs: 5 * 60 * 1000,
+  max: 20,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -114,7 +114,7 @@ app.post('/api/auth/register', registerLimiter, async (req, res) => {
 
     if (!username || !email || !password) {
       return res.status(400).send({
-        message: 'Username, email and password are required',
+        message: 'Заполните логин, email и пароль',
       })
     }
 
@@ -140,7 +140,7 @@ app.post('/api/auth/register', registerLimiter, async (req, res) => {
 
     if (existingUser) {
   return res.status(409).send({
-    message: 'User already exists',
+    message: 'Пользователь с таким логином уже существует',
   })
 }
 
@@ -148,7 +148,7 @@ app.post('/api/auth/register', registerLimiter, async (req, res) => {
 
     if (existingEmail) {
   return res.status(409).send({
-    message: 'Email already exists',
+    message: 'Пользователь с таким email уже существует',
   })
 }
 
@@ -180,7 +180,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 
     if (!username || !password) {
       return res.status(400).send({
-        message: 'Username and password are required',
+        message: 'Введите логин и пароль',
       })
     }
 
@@ -188,7 +188,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 
     if (!user) {
       return res.status(401).send({
-        message: 'Invalid username or password',
+        message: 'Неверный логин или пароль',
       })
     }
 
@@ -196,7 +196,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 
     if (!isPasswordValid) {
       return res.status(401).send({
-        message: 'Invalid username or password',
+        message: 'Неверный логин или пароль',
       })
     }
 
