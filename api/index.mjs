@@ -10,6 +10,7 @@ import {
   deleteRecord,
   createUser,
   findUserByUsername,
+  findUserByEmail,
   findUserById,
   startSession,
   finishSession,
@@ -44,6 +45,15 @@ const registerLimiter = rateLimit({
     message: 'Слишком много попыток регистрации, попробуйте позднее',
   },
 })
+
+const isValidUsername = (username) =>
+  /^[a-zA-Z0-9_]{3,30}$/.test(username)
+
+const isValidEmail = (email) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+
+const isValidPassword = (password) =>
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)
 
 const createToken = (user) =>
   jwt.sign(
@@ -108,19 +118,39 @@ app.post('/api/auth/register', registerLimiter, async (req, res) => {
       })
     }
 
-    if (password.length < 6) {
-      return res.status(400).send({
-        message: 'Password must be at least 6 characters',
-      })
-    }
+    if (!isValidUsername(username)) {
+  return res.status(400).send({
+    message: 'Логин должен быть 3–30 символов и содержать только латиницу, цифры или _',
+  })
+}
+
+    if (!isValidEmail(email)) {
+  return res.status(400).send({
+    message: 'Некорректный email',
+  })
+}
+
+    if (!isValidPassword(password)) {
+  return res.status(400).send({
+    message: 'Пароль должен быть минимум 8 символов, содержать заглавную букву, строчную букву и цифру',
+  })
+}
 
     const existingUser = await findUserByUsername(username)
 
     if (existingUser) {
-      return res.status(409).send({
-        message: 'User already exists',
-      })
-    }
+  return res.status(409).send({
+    message: 'User already exists',
+  })
+}
+
+    const existingEmail = await findUserByEmail(email)
+
+    if (existingEmail) {
+  return res.status(409).send({
+    message: 'Email already exists',
+  })
+}
 
     const passwordHash = await bcrypt.hash(password, 10)
 
