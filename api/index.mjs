@@ -23,6 +23,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret'
 
 const app = express()
 
+app.set('trust proxy', 1)
+
 app.use(bodyParser.json())
 app.use(cors())
 
@@ -54,6 +56,19 @@ const isValidEmail = (email) =>
 
 const isValidPassword = (password) =>
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)
+
+const sanitizeTitle = (title) => {
+  const value = String(title || '').trim()
+
+  if (!value) {
+    return 'Фокус-сессия'
+  }
+
+  return value
+}
+
+const isValidSessionTitle = (title) =>
+  title.length <= 30
 
 const createToken = (user) =>
   jwt.sign(
@@ -243,8 +258,21 @@ app.get('/sessions', async (_, res) => {
 })
 
 app.post('/sessions/start', async (req, res) => {
-  const title = req.body.title || 'Фокус-сессия'
-  res.send(await startSession(title))
+  try {
+    const title = sanitizeTitle(req.body.title)
+
+    if (!isValidSessionTitle(title)) {
+      return res.status(400).send({
+        message: 'Название сессии не должно быть длиннее 100 символов',
+      })
+    }
+
+    res.send(await startSession(title))
+  } catch (error) {
+    res.status(500).send({
+      message: 'Не удалось начать сессию',
+    })
+  }
 })
 
 app.post('/sessions/finish/:id', async (req, res) => {
@@ -260,8 +288,21 @@ app.get('/api/sessions', authMiddleware, async (req, res) => {
 })
 
 app.post('/api/sessions/start', authMiddleware, async (req, res) => {
-  const title = req.body.title || 'Фокус-сессия'
-  res.send(await startSession(title, req.user.id))
+  try {
+    const title = sanitizeTitle(req.body.title)
+
+    if (!isValidSessionTitle(title)) {
+      return res.status(400).send({
+        message: 'Название сессии не должно быть длиннее 30 символов',
+      })
+    }
+
+    res.send(await startSession(title, req.user.id))
+  } catch (error) {
+    res.status(500).send({
+      message: 'Не удалось начать сессию',
+    })
+  }
 })
 
 app.post('/api/sessions/finish/:id', authMiddleware, async (req, res) => {
