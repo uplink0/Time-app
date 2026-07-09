@@ -18,6 +18,35 @@
 
     <input v-model="password" placeholder="Пароль" type="password" />
 
+    <label v-if="isRegister" class="privacy-check">
+      <input v-model="privacyAccepted" type="checkbox" />
+      <span>
+        Я согласен с
+        <button class="privacy-link" type="button" @click="showPrivacyPolicy = !showPrivacyPolicy">
+          политикой обработки персональных данных
+        </button>
+      </span>
+    </label>
+
+    <div v-if="isRegister && showPrivacyPolicy" class="privacy-box">
+      <h3>Политика обработки персональных данных</h3>
+      <p>
+        Сервис Focus Time собирает минимальные данные, необходимые для работы приложения:
+        логин, email, хеш пароля и данные о фокус-сессиях.
+      </p>
+      <p>
+        Данные используются только для регистрации, входа в аккаунт, хранения личной статистики
+        и работы пользовательских сессий.
+      </p>
+      <p>
+        Пароли не хранятся в открытом виде. Для защиты используются HTTPS, JWT, bcrypt,
+        firewall и резервное копирование базы данных.
+      </p>
+      <p>
+        Пользователь может запросить удаление аккаунта и связанных данных у администратора сервиса.
+      </p>
+    </div>
+
     <button @click="submit" :disabled="loading">
       {{ isRegister ? 'Зарегистрироваться' : 'Войти' }}
     </button>
@@ -53,6 +82,8 @@ export default {
       username: '',
       email: '',
       password: '',
+      privacyAccepted: false,
+      showPrivacyPolicy: false,
       loading: false,
       message: '',
     }
@@ -62,12 +93,19 @@ export default {
     toggleMode() {
       this.isRegister = !this.isRegister
       this.message = ''
+      this.privacyAccepted = false
+      this.showPrivacyPolicy = false
     },
 
     async submit() {
       try {
         this.loading = true
         this.message = ''
+
+        if (this.isRegister && !this.privacyAccepted) {
+          this.message = 'Необходимо согласиться с политикой обработки персональных данных'
+          return
+        }
 
         const endpoint = this.isRegister
           ? `${this.apiUrl}/auth/register`
@@ -167,5 +205,50 @@ button {
 .message {
   margin-top: 12px;
   color: #ffb4b4;
+}
+
+.privacy-check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 14px;
+  color: #d0d5dd;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.privacy-check input {
+  width: auto;
+  margin-top: 2px;
+}
+
+.privacy-link {
+  width: auto;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #ffd166;
+  text-decoration: underline;
+}
+
+.privacy-box {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #101828;
+  color: #d0d5dd;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.privacy-box h3 {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 16px;
+}
+
+.privacy-box p {
+  margin: 8px 0;
 }
 </style>
