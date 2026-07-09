@@ -22,7 +22,11 @@
       <input v-model="privacyAccepted" type="checkbox" />
       <span>
         Я согласен с
-        <button class="privacy-link" type="button" @click="showPrivacyPolicy = !showPrivacyPolicy">
+        <button
+          class="privacy-link"
+          type="button"
+          @click="showPrivacyPolicy = !showPrivacyPolicy"
+        >
           политикой обработки персональных данных
         </button>
       </span>
@@ -31,19 +35,20 @@
     <div v-if="isRegister && showPrivacyPolicy" class="privacy-box">
       <h3>Политика обработки персональных данных</h3>
       <p>
-        Сервис Focus Time собирает минимальные данные, необходимые для работы приложения:
-        логин, email, хеш пароля и данные о фокус-сессиях.
+        Сервис Focus Time собирает минимальные данные: логин, email, хеш пароля
+        и данные о фокус-сессиях.
       </p>
       <p>
-        Данные используются только для регистрации, входа в аккаунт, хранения личной статистики
-        и работы пользовательских сессий.
+        Данные используются для регистрации, входа в аккаунт, хранения личной
+        статистики и работы пользовательских сессий.
       </p>
       <p>
-        Пароли не хранятся в открытом виде. Для защиты используются HTTPS, JWT, bcrypt,
-        firewall и резервное копирование базы данных.
+        Пароли не хранятся в открытом виде. Для защиты используются HTTPS, JWT,
+        bcrypt, firewall и резервное копирование базы данных.
       </p>
       <p>
-        Пользователь может запросить удаление аккаунта и связанных данных у администратора сервиса.
+        Пользователь может запросить удаление аккаунта и связанных данных у
+        администратора сервиса.
       </p>
     </div>
 
@@ -54,14 +59,14 @@
     <button class="link" @click="toggleMode">
       {{
         isRegister
-          ? 'Уже есть аккаунт? Войти'
-          : 'Нет аккаунта? Зарегистрироваться'
+          ? 'Войти'
+          : 'Зарегистрироваться'
       }}
     </button>
 
-    <p v-if="message" class="message">
+    <div v-if="message" class="error-bubble">
       {{ message }}
-    </p>
+    </div>
   </section>
 </template>
 
@@ -151,6 +156,7 @@ export default {
 
 <style scoped>
 .auth-card {
+  position: relative;
   width: min(420px, 100%);
   border-radius: 24px;
   background: #1d2939;
@@ -202,9 +208,30 @@ button {
   color: #ffd166;
 }
 
-.message {
-  margin-top: 12px;
-  color: #ffb4b4;
+.error-bubble {
+  position: absolute;
+  top: 135px;
+  right: -290px;
+  width: 260px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #fff;
+  color: #101828;
+  font-size: 14px;
+  line-height: 1.35;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+  z-index: 10;
+}
+
+.error-bubble::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 20px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  transform: rotate(45deg);
 }
 
 .privacy-check {
@@ -250,5 +277,17 @@ button {
 
 .privacy-box p {
   margin: 8px 0;
+}
+
+@media (max-width: 760px) {
+  .error-bubble {
+    position: static;
+    width: 100%;
+    margin-top: 14px;
+  }
+
+  .error-bubble::before {
+    display: none;
+  }
 }
 </style>
