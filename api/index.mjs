@@ -7,6 +7,14 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import rateLimit from 'express-rate-limit'
 import {
+  register,
+  metricsMiddleware,
+  registrationsTotal,
+  loginsTotal,
+  focusSessionsStartedTotal,
+} from './metrics/prometheus.mjs'
+
+import {
   readRecords,
   insertRecord,
   deleteRecord,
@@ -31,6 +39,7 @@ app.set('trust proxy', 1)
 app.use(bodyParser.json())
 app.use(cors())
 app.use('/api/admin', adminRoutes)
+app.use(metricsMiddleware)
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -97,6 +106,18 @@ app.get('/health', (_, res) => {
     status: 'ok',
     service: 'time-app-api',
   })
+})
+app.get('/metrics', async (_, res) => {
+  try {
+    res.set('Content-Type', register.contentType)
+    res.end(await register.metrics())
+  } catch (error) {
+    console.error('Metrics endpoint error:', error)
+
+    res.status(500).send({
+      message: 'Не удалось получить метрики',
+    })
+  }
 })
 app.post('/api/auth/register', registerLimiter, async (req, res) => {
   try {
@@ -199,6 +220,9 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 
     const token = createToken(publicUser)
 
+    loginsTotal.inc()
+    registrationsTotal.inc()
+
     res.send({
       user: publicUser,
       token,
@@ -295,9 +319,15 @@ app.post('/api/sessions/start', authMiddleware, async (req, res) => {
       })
     }
 
-    res.send(await startSession(title, req.user.id))
+    const session = await startSession(title, req.user.id)
+
+    focusSessionsStartedTotal.inc()
+
+    return res.send(session)
   } catch (error) {
-    res.status(500).send({
+    console.error('Start session error:', error)
+
+    return res.status(500).send({
       message: 'Не удалось начать сессию',
     })
   }
