@@ -7,8 +7,7 @@
       :api-url="apiUrl"
       @auth-success="handleAuthSuccess"
     />
-
-    <template v-else>
+ <template v-else>
       <section class="app">
         <div class="top">
           <p class="eyebrow">Focus Time</p>
@@ -35,6 +34,7 @@
               Удалить аккаунт
             </button>
           </div>
+        </div>
 
         <input
           v-model="title"
@@ -49,6 +49,7 @@
             <strong>{{ currentTime }}</strong>
             <small>{{ currentDate }}</small>
           </div>
+
 
           <div class="panel accent">
             <span>Таймер сессии</span>
