@@ -15,6 +15,7 @@ import {
   startSession,
   finishSession,
   readSessions,
+  deleteUserAccount,
   getStats,
 } from './src/utils/records.mjs'
 
@@ -239,6 +240,28 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
   res.send({
     user: req.user,
   })
+})
+
+app.delete('/api/auth/me', authMiddleware, async (req, res) => {
+  try {
+    const result = await deleteUserAccount(req.user.id)
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send({
+        message: 'Пользователь не найден',
+      })
+    }
+
+    return res.status(200).send({
+      message: 'Аккаунт и связанные данные удалены',
+    })
+  } catch (error) {
+    console.error('Account deletion error:', error)
+
+    return res.status(500).send({
+      message: 'Не удалось удалить аккаунт',
+    })
+  }
 })
 
 app.get('/times', async (_, res) => {
