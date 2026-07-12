@@ -7,7 +7,7 @@
       :api-url="apiUrl"
       @auth-success="handleAuthSuccess"
     />
- <template v-else>
+    <template v-else>
       <section class="app">
         <div class="top">
           <p class="eyebrow">Focus Time</p>
@@ -19,6 +19,14 @@
           </p>
 
           <div class="header-actions">
+            <button
+              v-if="user?.role === 'admin'"
+              class="admin-button"
+              @click="showAdminPanel = !showAdminPanel"
+            >
+              {{ showAdminPanel ? 'Выход из админки' : 'Администрирование' }}
+            </button>
+
             <button
               class="logout"
               @click="logout"
@@ -50,7 +58,6 @@
             <small>{{ currentDate }}</small>
           </div>
 
-
           <div class="panel accent">
             <span>Таймер сессии</span>
             <strong>{{ formattedTimer }}</strong>
@@ -62,7 +69,10 @@
               <button @click="setDuration(45)">45 мин</button>
             </div>
 
-            <div v-if="!activeSession" class="manual-duration">
+            <div
+              v-if="!activeSession"
+              class="manual-duration"
+            >
               <label>Своя длительность, минут</label>
 
               <input
@@ -96,33 +106,55 @@
             Завершить
           </button>
 
-          <button v-if="activeSession" class="light" @click="pauseTimer">
+          <button
+            v-if="activeSession"
+            class="light"
+            @click="pauseTimer"
+          >
             {{ isPaused ? 'Продолжить' : 'Пауза' }}
           </button>
 
-          <button class="light" @click="loadData" :disabled="loading">
+          <button
+            class="light"
+            @click="loadData"
+            :disabled="loading"
+          >
             Обновить
           </button>
         </div>
 
-        <p v-if="activeSession" class="active">
+        <p
+          v-if="activeSession"
+          class="active"
+        >
           Активная сессия: {{ activeSession.title }}
         </p>
 
-        <p v-if="message" class="message">
+        <p
+          v-if="message"
+          class="message"
+        >
           {{ message }}
         </p>
       </section>
+
+      <AdminPanel
+        v-if="user?.role === 'admin' && showAdminPanel"
+        :api-url="apiUrl"
+        :current-user-id="user.id"
+      />
 
       <section class="stats">
         <div>
           <strong>{{ stats.total_sessions }}</strong>
           <span>сессий</span>
         </div>
+
         <div>
           <strong>{{ stats.total_minutes }}</strong>
           <span>минут</span>
         </div>
+
         <div>
           <strong>{{ stats.longest_session }}</strong>
           <span>максимум</span>
@@ -154,15 +186,18 @@
 
 <script>
 import Auth from './components/Auth.vue'
+import AdminPanel from './components/AdminPanel.vue'
 
 export default {
   components: {
     Auth,
+    AdminPanel,
   },
 
   data() {
     return {
       user: null,
+      showAdminPanel: false,
       authLoading: true,
       title: '',
       durationMinutes: 25,
@@ -478,6 +513,16 @@ h1 {
 .logout {
   margin-top: 0;
   background: #fff;
+}
+
+.admin-button {
+  margin-top: 16px;
+  background: #7f56d9;
+  color: #fff;
+}
+
+.admin-button:hover {
+  background: #6941c6;
 }
 
 .task-input,
