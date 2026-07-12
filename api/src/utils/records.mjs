@@ -129,7 +129,7 @@ const findUserById = (id) =>
 
       connection.query(
         `
-        SELECT id, username, email, created_at
+        SELECT id, username, email, role, created_at
         FROM users
         WHERE id = ?
         LIMIT 1
@@ -137,7 +137,9 @@ const findUserById = (id) =>
         [id],
         (err, results) => {
           connection.release()
+
           if (err) return reject(err)
+
           resolve(results[0] || null)
         }
       )
