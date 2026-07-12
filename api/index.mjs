@@ -1,4 +1,6 @@
 import express from 'express'
+import authMiddleware from './middleware/auth.mjs'
+import adminRoutes from './routes/admin.mjs'
 import bodyParser from 'body-parser'
 import cors from 'cors'
 import bcrypt from 'bcryptjs'
@@ -28,6 +30,7 @@ app.set('trust proxy', 1)
 
 app.use(bodyParser.json())
 app.use(cors())
+app.use('/api/admin', adminRoutes)
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -77,42 +80,13 @@ const createToken = (user) =>
       id: user.id,
       username: user.username,
       email: user.email,
+      role: user.role,
     },
     JWT_SECRET,
     {
       expiresIn: '7d',
     }
   )
-
-const authMiddleware = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).send({
-        message: 'Unauthorized',
-      })
-    }
-
-    const token = authHeader.replace('Bearer ', '')
-    const payload = jwt.verify(token, JWT_SECRET)
-
-    const user = await findUserById(payload.id)
-
-    if (!user) {
-      return res.status(401).send({
-        message: 'User not found',
-      })
-    }
-
-    req.user = user
-    next()
-  } catch (error) {
-    return res.status(401).send({
-      message: 'Invalid token',
-    })
-  }
-}
 
 app.get('/', (_, res) => {
   res.send('Time App API is running')
@@ -220,6 +194,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
       id: user.id,
       username: user.username,
       email: user.email,
+      role: user.role,
     }
 
     const token = createToken(publicUser)
