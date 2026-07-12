@@ -2,7 +2,7 @@
   <main class="page">
     <div v-if="authLoading" class="loading">Загрузка...</div>
 
-    <Auth
+   <Auth
       v-else-if="!user"
       :api-url="apiUrl"
       @auth-success="handleAuthSuccess"
@@ -12,13 +12,29 @@
       <section class="app">
         <div class="top">
           <p class="eyebrow">Focus Time</p>
+
           <h1>Фокус-таймер</h1>
+
           <p class="subtitle">
-            Привет,{{ user.username }}. Это твоё личное пространство.
+            Привет, {{ user.username }}. Это твоё личное пространство.
           </p>
 
-          <button class="logout" @click="logout">Выйти</button>
-        </div>
+          <div class="header-actions">
+            <button
+              class="logout"
+              @click="logout"
+            >
+              Выйти
+            </button>
+
+            <button
+              class="delete-account-button"
+              :disabled="loading"
+              @click="deleteAccount"
+            >
+              Удалить аккаунт
+            </button>
+          </div>
 
         <input
           v-model="title"
@@ -451,8 +467,15 @@ h1 {
   color: #d0d5dd;
 }
 
+.header-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
 .logout {
-  margin-top: 16px;
+  margin-top: 0;
   background: #fff;
 }
 
@@ -549,6 +572,20 @@ button {
 .danger {
   color: #fff;
   background: #ff6b6b;
+}
+
+.delete-account-button {
+  background: #d92d20;
+  color: #fff;
+}
+
+.delete-account-button:hover {
+  background: #b42318;
+}
+
+.delete-account-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .active {

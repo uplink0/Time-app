@@ -254,6 +254,58 @@ const getStats = (userId = null) =>
     })
   )
 
+const deleteUserAccount = (userId) =>
+  new Promise((resolve, reject) =>
+    pool.getConnection((err, connection) => {
+      if (err) return reject(err)
+
+      connection.beginTransaction((err) => {
+        if (err) {
+          connection.release()
+          return reject(err)
+        }
+
+        connection.query(
+          'DELETE FROM focus_sessions WHERE user_id = ?',
+          [userId],
+          (err) => {
+            if (err) {
+              return connection.rollback(() => {
+                connection.release()
+                reject(err)
+              })
+            }
+
+            connection.query(
+              'DELETE FROM users WHERE id = ?',
+              [userId],
+              (err, result) => {
+                if (err) {
+                  return connection.rollback(() => {
+                    connection.release()
+                    reject(err)
+                  })
+                }
+
+                connection.commit((err) => {
+                  if (err) {
+                    return connection.rollback(() => {
+                      connection.release()
+                      reject(err)
+                    })
+                  }
+
+                  connection.release()
+                  resolve(result)
+                })
+              }
+            )
+          }
+        )
+      })
+    })
+  )
+
 export {
   readRecords,
   insertRecord,
@@ -265,5 +317,6 @@ export {
   startSession,
   finishSession,
   readSessions,
+  deleteUserAccount,
   getStats
 }
